@@ -1,0 +1,346 @@
+{
+  "mcp_version": "1.0.0",
+  "service_name": "character-service",
+  "tools": [
+    {
+      "name": "create_character",
+      "description": "Create a new character with personality traits and backstory",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Character's full name",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "nickname": {
+            "type": "string",
+            "description": "Character's nickname or alias",
+            "maxLength": 50
+          },
+          "age": {
+            "type": "integer",
+            "description": "Character's age",
+            "minimum": 0,
+            "maximum": 200
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character's gender identity",
+            "maxLength": 50
+          },
+          "occupation": {
+            "type": "string",
+            "description": "Character's profession or role",
+            "maxLength": 100
+          },
+          "backstory": {
+            "type": "string",
+            "description": "Character's history and background",
+            "maxLength": 2000
+          },
+          "physical_description": {
+            "type": "string",
+            "description": "Character's appearance and physical traits",
+            "maxLength": 1000
+          },
+          "personality_traits": {
+            "type": "object",
+            "description": "Structured personality attributes",
+            "properties": {
+              "dominant_traits": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "trait": {"type": "string"},
+                    "intensity": {"type": "integer", "minimum": 1, "maximum": 10},
+                    "manifestation": {"type": "string"}
+                  },
+                  "required": ["trait", "intensity"]
+                }
+              }
+            }
+          },
+          "narrative_role": {
+            "type": "string",
+            "enum": ["protagonist", "antagonist", "mentor", "ally", "neutral", "comic_relief"],
+            "description": "Character's role in the story"
+          },
+          "archetype_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional archetype template ID"
+          }
+        },
+        "required": ["name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the created character"
+          },
+          "name": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "success": {"type": "boolean"}
+        },
+        "required": ["character_id", "name", "created_at", "success"]
+      }
+    },
+    {
+      "name": "get_character",
+      "description": "Retrieve a character by ID with full profile",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique character identifier"
+          }
+        },
+        "required": ["character_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "character": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string", "format": "uuid"},
+              "name": {"type": "string"},
+              "nickname": {"type": "string"},
+              "age": {"type": "integer"},
+              "gender": {"type": "string"},
+              "occupation": {"type": "string"},
+              "backstory": {"type": "string"},
+              "physical_description": {"type": "string"},
+              "personality_traits": {"type": "object"},
+              "emotional_state": {"type": "object"},
+              "narrative_role": {"type": "string"},
+              "created_at": {"type": "string", "format": "date-time"},
+              "updated_at": {"type": "string", "format": "date-time"}
+            },
+            "required": ["id", "name", "created_at"]
+          },
+          "success": {"type": "boolean"}
+        },
+        "required": ["character", "success"]
+      }
+    },
+    {
+      "name": "search_characters",
+      "description": "Search characters by name, traits, or narrative role",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query for character name or traits",
+            "maxLength": 200
+          },
+          "narrative_role": {
+            "type": "string",
+            "enum": ["protagonist", "antagonist", "mentor", "ally", "neutral", "comic_relief"],
+            "description": "Filter by narrative role"
+          },
+          "personality_traits": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Filter by personality traits"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "description": "Maximum number of results"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of results to skip"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "characters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "name": {"type": "string"},
+                "nickname": {"type": "string"},
+                "narrative_role": {"type": "string"},
+                "personality_summary": {"type": "string"}
+              }
+            }
+          },
+          "total_count": {"type": "integer"},
+          "success": {"type": "boolean"}
+        },
+        "required": ["characters", "total_count", "success"]
+      }
+    },
+    {
+      "name": "create_relationship",
+      "description": "Create a relationship between two characters",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "character_a_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "First character ID"
+          },
+          "character_b_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Second character ID"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": ["family", "romantic", "friendship", "professional", "adversarial", "mentor"],
+            "description": "Type of relationship"
+          },
+          "strength": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Relationship intensity (1-10)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "complicated", "developing"],
+            "default": "active",
+            "description": "Current relationship status"
+          },
+          "history": {
+            "type": "string",
+            "description": "Relationship development history",
+            "maxLength": 1000
+          },
+          "is_mutual": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether relationship is bidirectional"
+          }
+        },
+        "required": ["character_a_id", "character_b_id", "relationship_type"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "relationship_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique relationship identifier"
+          },
+          "character_a_id": {"type": "string", "format": "uuid"},
+          "character_b_id": {"type": "string", "format": "uuid"},
+          "relationship_type": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "success": {"type": "boolean"}
+        },
+        "required": ["relationship_id", "character_a_id", "character_b_id", "relationship_type", "created_at", "success"]
+      }
+    },
+    {
+      "name": "get_character_relationships",
+      "description": "Get all relationships for a specific character",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Character ID to get relationships for"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": ["family", "romantic", "friendship", "professional", "adversarial", "mentor"],
+            "description": "Optional filter by relationship type"
+          }
+        },
+        "required": ["character_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "relationships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationship_id": {"type": "string", "format": "uuid"},
+                "related_character": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string", "format": "uuid"},
+                    "name": {"type": "string"},
+                    "nickname": {"type": "string"}
+                  }
+                },
+                "relationship_type": {"type": "string"},
+                "strength": {"type": "integer"},
+                "status": {"type": "string"},
+                "history": {"type": "string"}
+              }
+            }
+          },
+          "success": {"type": "boolean"}
+        },
+        "required": ["relationships", "success"]
+      }
+    },
+    {
+      "name": "update_character",
+      "description": "Update character attributes while preserving relationships",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Character ID to update"
+          },
+          "updates": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string", "maxLength": 100},
+              "nickname": {"type": "string", "maxLength": 50},
+              "age": {"type": "integer", "minimum": 0, "maximum": 200},
+              "occupation": {"type": "string", "maxLength": 100},
+              "backstory": {"type": "string", "maxLength": 2000},
+              "personality_traits": {"type": "object"},
+              "emotional_state": {"type": "object"},
+              "narrative_role": {
+                "type": "string",
+                "enum": ["protagonist", "antagonist", "mentor", "ally", "neutral", "comic_relief"]
+              }
+            }
+          }
+        },
+        "required": ["character_id", "updates"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "character_id": {"type": "string", "format": "uuid"},
+          "updated_fields": {"type": "array", "items": {"type": "string"}},
+          "updated_at": {"type": "string", "format": "date-time"},
+          "success": {"type": "boolean"}
+        },
+        "required": ["character_id", "updated_fields", "updated_at", "success"]
+      }
+    }
+  ]
+}

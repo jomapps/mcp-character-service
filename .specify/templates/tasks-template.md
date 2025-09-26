@@ -49,17 +49,17 @@
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
-- [ ] T004 [P] Contract test POST /api/users in tests/contract/test_users_post.py
-- [ ] T005 [P] Contract test GET /api/users/{id} in tests/contract/test_users_get.py
-- [ ] T006 [P] Integration test user registration in tests/integration/test_registration.py
-- [ ] T007 [P] Integration test auth flow in tests/integration/test_auth.py
+- [ ] T004 [P] MCP tool contract test for character creation in tests/contract/test_mcp_create_character.py
+- [ ] T005 [P] MCP tool contract test for character retrieval in tests/contract/test_mcp_get_character.py
+- [ ] T006 [P] Integration test character persistence in tests/integration/test_character_persistence.py
+- [ ] T007 [P] Integration test character relationships in tests/integration/test_character_relationships.py
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
-- [ ] T008 [P] User model in src/models/user.py
-- [ ] T009 [P] UserService CRUD in src/services/user_service.py
-- [ ] T010 [P] CLI --create-user in src/cli/user_commands.py
-- [ ] T011 POST /api/users endpoint
-- [ ] T012 GET /api/users/{id} endpoint
+- [ ] T008 [P] Character model in src/models/character.py
+- [ ] T009 [P] CharacterService domain logic in src/services/character_service.py
+- [ ] T010 [P] MCP character tools in src/mcp/character_tools.py
+- [ ] T011 Character creation endpoint
+- [ ] T012 Character retrieval endpoint
 - [ ] T013 Input validation
 - [ ] T014 Error handling and logging
 
