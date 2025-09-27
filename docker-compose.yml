@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  character-service:
+    build: .
+    ports:
+      - "8011:8011"
+    environment:
+      - DATABASE_URL=postgresql://character_user:character_pass@postgres:5432/character_db
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=development
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./config:/app/config
+    networks:
+      - character-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=character_db
+      - POSTGRES_USER=character_user
+      - POSTGRES_PASSWORD=character_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - character-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - character-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - character-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+
+networks:
+  character-network:
+    driver: bridge
