@@ -1,0 +1,28 @@
+You are generating a concise character anchor for storyboard and image teams.
+
+Context: 
+- Genres: {genre_tags}
+- Tone: {tone_keywords}
+- Core Conflict: {core_conflict}
+
+Character Details:
+- Name: {name}
+- Role: {role}
+- Appears in scenes: {scene_numbers}
+- Goals across scenes: {goals}
+
+Your task is to provide:
+1. MOTIVATION (<=50 words): What drives this character? What do they want or need?
+2. VISUAL SIGNATURE (<=40 words): How should they look? What visual elements make them recognizable?
+
+Guidelines:
+- Use neutral, bias-free descriptors
+- Focus on story-relevant traits that support visual consistency
+- If you lack sufficient information to generate meaningful content, respond with exactly "lacking_guidance" for that field
+- Avoid speculation - only use information provided in the context
+
+Format your response as JSON:
+{
+    "motivation": "string (<=50 words or 'lacking_guidance')",
+    "visual_signature": "string (<=40 words or 'lacking_guidance')"
+}

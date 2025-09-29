@@ -1,6 +1,7 @@
 """
 Structured logging and Prometheus metrics for Character Service.
 """
+import asyncio
 import time
 import uuid
 from typing import Dict, Any, Optional, Callable
@@ -289,3 +290,74 @@ def get_prometheus_metrics() -> str:
 def get_metrics_content_type() -> str:
     """Get Prometheus metrics content type."""
     return CONTENT_TYPE_LATEST
+
+
+# Character Creator specific metrics
+CHARACTER_CREATOR_METRICS = Counter(
+    'character_creator_operations_total',
+    'Character creator operations',
+    ['operation', 'status']
+)
+
+CHARACTER_CREATOR_LATENCY = Histogram(
+    'character_creator_latency_seconds',
+    'Character creator operation latency',
+    ['operation']
+)
+
+
+async def emit_metric(metric_name: str, value: float, labels: Optional[Dict[str, str]] = None):
+    """Emit a custom metric."""
+    try:
+        if metric_name == "character_creator.profile_count":
+            CHARACTER_CREATOR_METRICS.labels(
+                operation="profile_generation",
+                status="success"
+            ).inc(value)
+        elif metric_name == "character_creator.unresolved_reference_rate":
+            # For rates, we could use a gauge instead
+            pass
+        elif metric_name == "character_creator.latency_ms":
+            CHARACTER_CREATOR_LATENCY.labels(
+                operation="profile_generation"
+            ).observe(value / 1000)  # Convert ms to seconds
+        elif metric_name == "character_creator.error_count":
+            CHARACTER_CREATOR_METRICS.labels(
+                operation="profile_generation",
+                status="error"
+            ).inc(value)
+    except Exception as e:
+        # Don't let metrics failures break the application
+        logger = structlog.get_logger(__name__)
+        logger.warning("Failed to emit metric", metric_name=metric_name, error=str(e))
+
+
+def track_execution_time(operation_name: str):
+    """Decorator to track execution time of functions."""
+    def decorator(func):
+        if asyncio.iscoroutinefunction(func):
+            async def async_wrapper(*args, **kwargs):
+                start_time = time.time()
+                try:
+                    result = await func(*args, **kwargs)
+                    duration = time.time() - start_time
+                    await emit_metric(f"{operation_name}.latency_ms", duration * 1000)
+                    return result
+                except Exception as e:
+                    duration = time.time() - start_time
+                    await emit_metric(f"{operation_name}.error_count", 1)
+                    raise
+            return async_wrapper
+        else:
+            def sync_wrapper(*args, **kwargs):
+                start_time = time.time()
+                try:
+                    result = func(*args, **kwargs)
+                    duration = time.time() - start_time
+                    # Note: sync version can't emit async metrics
+                    return result
+                except Exception as e:
+                    duration = time.time() - start_time
+                    raise
+            return sync_wrapper
+    return decorator

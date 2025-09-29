@@ -17,6 +17,7 @@ from src.mcp.tools.search_characters import SearchCharactersTool
 from src.mcp.tools.create_relationship import CreateRelationshipTool
 from src.mcp.tools.get_character_relationships import GetCharacterRelationshipsTool
 from src.mcp.tools.update_character import UpdateCharacterTool
+from src.mcp.tools.generate_character_profiles import GenerateCharacterProfilesTool
 from src.database.connection import init_database, close_database
 
 logger = structlog.get_logger(__name__)
@@ -39,7 +40,8 @@ class MCPCharacterServer:
             SearchCharactersTool,
             CreateRelationshipTool,
             GetCharacterRelationshipsTool,
-            UpdateCharacterTool
+            UpdateCharacterTool,
+            GenerateCharacterProfilesTool
         ]
         
         for tool_class in tool_classes:
